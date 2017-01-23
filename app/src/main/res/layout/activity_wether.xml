@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/temprature"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="temprature"
+        android:textSize="20sp" />
+
+    <TextView
+        android:id="@+id/humidity"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="humidity"
+        android:textSize="20sp" />
+
+    <TextView
+        android:id="@+id/pressur"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="pressure"
+        android:textSize="20sp" />
+
+    <TextView
+        android:id="@+id/longi"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="longitude"
+        android:textSize="20sp" />
+
+    <TextView
+        android:id="@+id/latit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="latitude"
+        android:textSize="20sp" />
+
+    <TextView
+        android:id="@+id/sunrise"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="sunrise"
+        android:textSize="20sp" />
+
+    <TextView
+        android:id="@+id/sunset"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="sunset"
+        android:textSize="20sp" />
+
+    <ImageView
+        android:id="@+id/condIcon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+</LinearLayout>

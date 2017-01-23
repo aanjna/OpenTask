@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">quickstart</string>
+    <string name="app_wether">wether</string>
+</resources>
