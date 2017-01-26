@@ -1,26 +1,5 @@
 package com.example.quickstart;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.extensions.android.http.AndroidHttp;
-import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
-import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
-import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
-import com.google.api.client.googleapis.extensions.android.gms.auth.GooglePlayServicesAvailabilityIOException;
-import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
-
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.client.util.ExponentialBackOff;
-
-import com.google.api.client.util.store.FileDataStoreFactory;
-import com.google.api.services.sheets.v4.Sheets;
-import com.google.api.services.sheets.v4.SheetsScopes;
-
-import com.google.api.services.sheets.v4.model.*;
-
 import android.Manifest;
 import android.accounts.AccountManager;
 import android.app.Activity;
@@ -35,19 +14,27 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
-import android.text.method.QwertyKeyListener;
-import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.api.client.extensions.android.http.AndroidHttp;
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+import com.google.api.client.googleapis.extensions.android.gms.auth.GooglePlayServicesAvailabilityIOException;
+import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.util.ExponentialBackOff;
+import com.google.api.client.util.store.FileDataStoreFactory;
+import com.google.api.services.sheets.v4.SheetsScopes;
+import com.google.api.services.sheets.v4.model.ValueRange;
+
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -57,24 +44,28 @@ import pub.devrel.easypermissions.EasyPermissions;
 
 public class MainActivity extends Activity
         implements EasyPermissions.PermissionCallbacks {
-    GoogleAccountCredential mCredential;
-    private TextView mOutputText;
-    private EditText et;
-    private Button mCallApiButton, wether;
-    ProgressDialog mProgress;
-    private static final JsonFactory JSON_FACTORY =
-            JacksonFactory.getDefaultInstance();
-
-    private static HttpTransport HTTP_TRANSPORT;
-    private static final String APPLICATION_NAME =
-            "Google Sheets API Java Quickstart";
     static final int REQUEST_ACCOUNT_PICKER = 1000;
     static final int REQUEST_AUTHORIZATION = 1001;
     static final int REQUEST_GOOGLE_PLAY_SERVICES = 1002;
     static final int REQUEST_PERMISSION_GET_ACCOUNTS = 1003;
-
+    private static final JsonFactory JSON_FACTORY =
+            JacksonFactory.getDefaultInstance();
+    private static final java.io.File DATA_STORE_DIR = new java.io.File(
+            System.getProperty("user.home"), ".credentials/sheets.googleapis.com-java-quickstart.json");
+    private static final String APPLICATION_NAME =
+            "Google Sheets API Java Quickstart";
     private static final String PREF_ACCOUNT_NAME = "accountName";
     private static final String[] SCOPES = {SheetsScopes.SPREADSHEETS};
+    /**
+     * Global instance of the {@link FileDataStoreFactory}.
+     */
+    private static FileDataStoreFactory DATA_STORE_FACTORY;
+    private static HttpTransport HTTP_TRANSPORT;
+    GoogleAccountCredential mCredential;
+    ProgressDialog mProgress;
+    private TextView mOutputText;
+    private EditText et;
+    private Button mCallApiButton, wether;
 
     /**
      * Create the main activity.
@@ -103,20 +94,9 @@ public class MainActivity extends Activity
         wether.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-startActivity(new Intent(MainActivity.this, QuestionsActivity.class));
+                startActivity(new Intent(MainActivity.this, UploadOnDrive.class));
+                // postToSheet();
 
-              /*  try {
-                    ValueRange response = getSheetsService().spreadsheets().values()
-                            .get("1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms", "Class Data!A2:E")
-                            .execute();
-                    List<List<Object>> values = response.getValues();
-
-                    getSheetsService().spreadsheets().values().update("1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms", "Class Data!A2:E", response)
-                            .setValueInputOption("RAW")
-                            .execute();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }*/
             }
         });
 
@@ -130,6 +110,11 @@ startActivity(new Intent(MainActivity.this, QuestionsActivity.class));
         mCredential = GoogleAccountCredential.usingOAuth2(
                 getApplicationContext(), Arrays.asList(SCOPES))
                 .setBackOff(new ExponentialBackOff());
+    }
+
+    private void postToSheet() {
+        Log.i("postTosheet", "yha post hona chahiye");
+
     }
 
     private void getResultsFromApi() {
@@ -285,7 +270,6 @@ startActivity(new Intent(MainActivity.this, QuestionsActivity.class));
     }
 
 
-
     /**
      * An asynchronous task that handles the Google Sheets API call.
      * Placing the API calls in their own task ensures the UI stays responsive.
@@ -302,7 +286,6 @@ startActivity(new Intent(MainActivity.this, QuestionsActivity.class));
                     .setApplicationName("Google Sheets API Android Quickstart")
                     .build();
         }
-//https://docs.google.com/spreadsheets/d/1K4pYrnnpDD3qMnKHUztM-iIHrwgkoEBugGURQA1w_ik/edit#gid=481374740
 
         /**
          * Background task to call Google Sheets API.
@@ -313,7 +296,7 @@ startActivity(new Intent(MainActivity.this, QuestionsActivity.class));
         protected List<String> doInBackground(Void... params) {
             try {
                 //putDatatoSheet();
-                Log.e("background","data post call");
+                Log.e("background", "data post call");
                 return getDataFromApi();
             } catch (Exception e) {
                 mLastError = e;
@@ -330,17 +313,17 @@ startActivity(new Intent(MainActivity.this, QuestionsActivity.class));
          * @throws IOException
          */
         private List<String> getDataFromApi() throws IOException {
-            String spreadsheetId = "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms";
-            String range = "Class Data!A2:E";
+            String spreadsheetId = "1SWRe7Bghq4NbUwiNFKtUm8tQbSjcv3v5xapKcPsAZCk";
+            String range = "Class Data!A2:B";
             List<String> results = new ArrayList<String>();
             ValueRange response = this.mService.spreadsheets().values()
                     .get(spreadsheetId, range)
                     .execute();
             List<List<Object>> values = response.getValues();
             if (values != null) {
-                results.add("Name, Major");
+                results.add("Name, Mobile");
                 for (List row : values) {
-                    results.add(row.get(0) + ", " + row.get(4));
+                    results.add(row.get(0) + ", " + row.get(1));
                 }
             }
             return results;
@@ -385,44 +368,59 @@ startActivity(new Intent(MainActivity.this, QuestionsActivity.class));
         }
     }
 
-  /*  public static Credential authorize() throws IOException {
+/*
+
+    public static Credential authorize() throws IOException {
         // Load client secrets.
-        InputStream in =
-                SheetsQuickstart.class.getResourceAsStream("/resources/client_secret.json");
+        InputStream in = MainActivity.class.getResourceAsStream("/resources/client_secret.json");
         GoogleClientSecrets clientSecrets =
                 GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
 
         // Build flow and trigger user authorization request.
         GoogleAuthorizationCodeFlow flow =
-                new GoogleAuthorizationCodeFlow.Builder(
-                        HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
+                new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, Arrays.asList(SCOPES))
                         .setDataStoreFactory(DATA_STORE_FACTORY)
                         .setAccessType("offline")
                         .build();
-        FileDataStoreFactory FileDataStoreFactory=
-        Credential credential = new AuthorizationCodeInstalledApp(
-                flow, new LocalServerReceiver()).authorize("user");
-        System.out.println(
-                "Credentials saved to " + DATA_STORE_DIR.getAbsolutePath());
+
+        Credential credential = new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user");
+
         return credential;
     }
 
 
     public static Sheets getSheetsService() throws IOException {
-        Credential credential= authorize() ;
+        Credential credential = authorize();
         return new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
                 .setApplicationName(APPLICATION_NAME)
                 .build();
     }
+
     private List<Request> putDatatoSheet() throws IOException {
         Sheets service = getSheetsService();
         List<Request> requests = new ArrayList<>();
 
-        List<CellData> values = new ArrayList<>();
+        //List<CellData> values = new ArrayList<>();
         String spreadsheetId = "1K4pYrnnpDD3qMnKHUztM-iIHrwgkoEBugGURQA1w_ik";
         String range = "Class Data!A2:E";
 
-        values.add(new CellData()
+        List<List<Object>> arrData = getData();
+
+        ValueRange oRange = new ValueRange();
+        oRange.setRange(range); // I NEED THE NUMBER OF THE LAST ROW
+        oRange.setValues(arrData);
+
+        List<ValueRange> oList = new ArrayList<>();
+        oList.add(oRange);
+
+        BatchUpdateValuesRequest oRequest = new BatchUpdateValuesRequest();
+        oRequest.setValueInputOption("RAW");
+        oRequest.setData(oList);
+
+        BatchUpdateValuesResponse oResp1 = service.spreadsheets().values().batchUpdate(spreadsheetId, oRequest).execute();
+
+       */
+/* values.add(new CellData()
                 .setUserEnteredValue(new ExtendedValue()
                         .setStringValue("Hello World!")));
         requests.add(new Request()
@@ -438,9 +436,23 @@ startActivity(new Intent(MainActivity.this, QuestionsActivity.class));
         BatchUpdateSpreadsheetRequest batchUpdateRequest = new BatchUpdateSpreadsheetRequest()
                 .setRequests(requests);
 
-        service.spreadsheets().batchUpdate(spreadsheetId, batchUpdateRequest).execute();
+        service.spreadsheets().batchUpdate(spreadsheetId, batchUpdateRequest).execute();*//*
+
         return requests;
-    }*/
+    }
+
+    public static List<List<Object>> getData() {
+
+        List<Object> data1 = new ArrayList<Object>();
+        data1.add("Ashwin");
+
+        List<List<Object>> data = new ArrayList<List<Object>>();
+        data.add(data1);
+
+        return data;
+    }
+*/
+
 }
 
 //POST https://sheets.googleapis.com/v4/spreadsheets/spreadsheetId:batchUpdate
